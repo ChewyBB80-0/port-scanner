@@ -1,5 +1,7 @@
 # Port Scanner
 
+[![tests](https://github.com/ChewyBB80-0/port-scanner/actions/workflows/tests.yml/badge.svg)](https://github.com/ChewyBB80-0/port-scanner/actions/workflows/tests.yml)
+
 A multi-threaded TCP port scanner in Python with two scan modes and service banner grabbing.
 I built it by hand as a learning project, in five stages, as the first module of a larger
 security audit tool.
@@ -80,6 +82,25 @@ seconds to deliver a "connection refused", even on localhost, so a 2-second time
 before the refusal arrived. Raising the timeout to 3 seconds fixed it. A longer timeout also
 costs nothing on ports that answer, because `connect_ex` returns as soon as the reply lands.
 The lesson was to measure the behaviour first, then pick the fix.
+
+## Tests
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+11 unit tests, standard library only. GitHub Actions runs them on every push, on Ubuntu and
+Windows with Python 3.9 and 3.13.
+
+- **Connect scan:** a real open port and a real closed port on 127.0.0.1, plus a mocked timeout
+  that must read as filtered.
+- **Banner grabbing:** a local server that speaks first (like SSH) and a silent one that only
+  answers the HTTP probe.
+- **SYN scan:** the reply-flag logic, with a fake Scapy so it runs without root. SYN/ACK must
+  read as open and send exactly one RST, RST/ACK must read as closed, and no reply must read as filtered.
+- **Orchestrator:** unresolvable hosts are skipped, and a mixed scan reports the right counts.
+
+The network tests only ever talk to throwaway servers on 127.0.0.1.
 
 ## Next
 
